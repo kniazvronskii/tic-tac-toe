@@ -1,23 +1,37 @@
-let players = ['x', 'o'];
-let activePlayer = 0;
-let board = [];
+const players = ['x', 'o'];
+const boardSize = 3;
+
+let activePlayer;
+let sum;
+let board;
 
 function startGame() {
-  board = [
-    ['', '', ''],
-    ['', '', ''],
-    ['', '', '']
-  ];    
-  
+  board = [];
+  activePlayer = 0;
+  sum = 0;
+
+  boardGeneration(boardSize);
+
   renderBoard(board);
 }
 
-function click(row, col) {
-    board[row][col] = players[activePlayer];
-    renderBoard(board);
+function boardGeneration(boardSize){
+  for(let i = 0; i < boardSize; i++) {
+    board[i] = [];
+      for(let j = 0; j < boardSize; j++) {
+        board[i][j] = '';
+      }
+  }
+}
 
-    checkWinner(row, col);
-} 
+function click(row, col) {
+  sum++;
+  board[row][col] = players[activePlayer];
+  renderBoard(board);
+
+  checkWinner(row, col);
+  changePlayer();
+}
 
 function changePlayer() {
   activePlayer = activePlayer === 0 ? 1 : 0;
@@ -25,35 +39,39 @@ function changePlayer() {
 
 function checkWinner(row, col) {
   let winner = players[activePlayer];
+  let horizontal = 0;
+  let vertical = 0;
+  let diagonal = 0;
+  let antidiagonal = 0;
 
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < board.length; i++) {
 
-    // horizontal && vertical
+    if(board[+row][i] === winner) {
+    horizontal++;
+    } 
 
-    if(board[i][0] === winner && board[i][1] === winner && board[i][2] === winner ||
-      board[0][i] === winner && board[1][i] === winner && board[2][i] === winner) {
-        showWinner(players.indexOf(winner));
-      } 
+    if(board[i][+col] === winner) {
+      vertical++;
+    }
 
-    // diagonal
+    if(board[i][i] === winner) {
+      diagonal++;
+    }
 
-    else if(board[0][0] === winner && board[1][1] === winner && board[2][2] === winner ||
-      board[2][0] === winner && board[1][1] === winner && board[0][2] === winner) {
-        showWinner(players.indexOf(winner));
-      }
-
-    // tie
-
-    else if(board[0].indexOf('') === -1 && 
-      board[1].indexOf('') === -1 && 
-      board[2].indexOf('') === -1) {
-        let header = modalEl.getElementsByTagName('h2')[0];
-        header.textContent = '😺Ничья!😸';
-        modalEl.classList.remove('hidden');
-      }
-
-    else {
-      changePlayer();
+    if(board[i][board[i].length - i - 1] === winner) {
+      antidiagonal++;
     }
   }
+
+  if (horizontal === board.length || 
+    vertical === board.length || 
+    diagonal === board.length || 
+    antidiagonal === board.length) {
+    showWinner(activePlayer);
+  } else if(sum === board.length**2) {
+    let header = modalEl.getElementsByTagName('h2')[0];
+    header.textContent = '😺Ничья!😸';
+    modalEl.classList.remove('hidden');
+  } 
 }
+
